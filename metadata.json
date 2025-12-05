@@ -1,0 +1,5 @@
+{
+  "name": "StreamClone",
+  "description": "A high-fidelity streaming service clone featuring a hero banner, categorized movie rows, and detailed movie modals. Built with React, TypeScript, and Tailwind CSS.",
+  "requestFramePermissions": []
+}
