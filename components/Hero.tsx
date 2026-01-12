@@ -101,7 +101,7 @@ export const Hero: React.FC<HeroProps> = ({ movie, onMoreInfo, onPlay, language,
 
       {/* Content - Positioned at bottom */}
       <div
-        className={`absolute bottom-[30%] md:bottom-[25%] left-4 md:left-12 max-w-2xl space-y-4 z-10 transition-opacity duration-500 ${showControls ? 'opacity-100' : 'opacity-0'
+        className={`absolute bottom-[35%] md:bottom-[30%] left-4 md:left-12 max-w-2xl space-y-4 z-20 transition-opacity duration-500 ${showControls ? 'opacity-100' : 'opacity-0'
           }`}
       >
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold drop-shadow-2xl text-white">
@@ -111,20 +111,22 @@ export const Hero: React.FC<HeroProps> = ({ movie, onMoreInfo, onPlay, language,
           {movie.description}
         </p>
 
-        <div className="flex items-center gap-4 md:gap-6 mt-8">
+        <div className="flex items-center gap-4 md:gap-6 mt-8 pointer-events-auto">
           <button
             tabIndex={0}
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               onPlay(movie);
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
+                e.stopPropagation();
                 onPlay(movie);
               }
             }}
-            className="flex items-center gap-3 bg-white text-black px-8 md:px-10 py-3 md:py-4 rounded font-bold hover:bg-opacity-80 transition shadow-lg text-lg md:text-xl focus:outline-none focus:ring-4 focus:ring-white/50"
+            className="flex items-center gap-3 bg-white text-black px-8 md:px-10 py-3 md:py-4 rounded font-bold hover:bg-opacity-80 transition shadow-lg text-lg md:text-xl focus:outline-none focus:ring-4 focus:ring-white/50 cursor-pointer z-30 relative"
           >
             <Play className="fill-black w-6 h-6 md:w-7 md:h-7" />
             {t.play}
@@ -132,16 +134,18 @@ export const Hero: React.FC<HeroProps> = ({ movie, onMoreInfo, onPlay, language,
           <button
             tabIndex={0}
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               onMoreInfo(movie);
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
+                e.stopPropagation();
                 onMoreInfo(movie);
               }
             }}
-            className="flex items-center gap-3 bg-gray-500/70 text-white px-8 md:px-10 py-3 md:py-4 rounded font-bold hover:bg-gray-500/50 transition backdrop-blur-sm shadow-lg text-lg md:text-xl focus:outline-none focus:ring-4 focus:ring-white/50"
+            className="flex items-center gap-3 bg-gray-500/70 text-white px-8 md:px-10 py-3 md:py-4 rounded font-bold hover:bg-gray-500/50 transition backdrop-blur-sm shadow-lg text-lg md:text-xl focus:outline-none focus:ring-4 focus:ring-white/50 cursor-pointer z-30 relative"
           >
             <Info className="w-6 h-6 md:w-7 md:h-7" />
             {t.moreInfo}
@@ -152,16 +156,18 @@ export const Hero: React.FC<HeroProps> = ({ movie, onMoreInfo, onPlay, language,
             <button
               tabIndex={0}
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 setIsMuted(!isMuted);
               }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
+                  e.stopPropagation();
                   setIsMuted(!isMuted);
                 }
               }}
-              className="border-2 border-white/60 rounded-full p-3 md:p-4 hover:bg-white/20 transition bg-black/30 backdrop-blur-sm shadow-lg focus:outline-none focus:ring-4 focus:ring-white/50"
+              className="border-2 border-white/60 rounded-full p-3 md:p-4 hover:bg-white/20 transition bg-black/30 backdrop-blur-sm shadow-lg focus:outline-none focus:ring-4 focus:ring-white/50 cursor-pointer z-30 relative"
               aria-label={isMuted ? 'Unmute' : 'Mute'}
             >
               {isMuted ? (
@@ -175,4 +181,5 @@ export const Hero: React.FC<HeroProps> = ({ movie, onMoreInfo, onPlay, language,
       </div>
     </div>
   );
+};
 };
