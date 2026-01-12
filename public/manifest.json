@@ -4,7 +4,7 @@
   "description": "Streaming app compatible with Android TV",
   "start_url": "/",
   "display": "standalone",
-  "orientation": "landscape",
+  "orientation": "portrait",
   "background_color": "#141414",
   "theme_color": "#141414",
   "icons": [

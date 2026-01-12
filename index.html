@@ -57,6 +57,21 @@
       }
     }
 
+    /* Orientação: Portrait no mobile, Landscape em TV */
+    @media (max-width: 768px) {
+      /* Mobile: Força portrait */
+      html, body {
+        min-height: 100vh;
+      }
+    }
+
+    @media (min-width: 1280px) and (orientation: landscape) {
+      /* TV: Permite landscape */
+      html, body {
+        min-height: 100vh;
+      }
+    }
+
     /* Animação de fade-in para popup */
     @keyframes fade-in {
       from {
