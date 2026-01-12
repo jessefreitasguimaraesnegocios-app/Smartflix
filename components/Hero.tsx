@@ -182,4 +182,3 @@ export const Hero: React.FC<HeroProps> = ({ movie, onMoreInfo, onPlay, language,
     </div>
   );
 };
-};
