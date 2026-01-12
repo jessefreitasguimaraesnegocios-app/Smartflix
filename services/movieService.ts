@@ -20,11 +20,12 @@ const fetchGenres = async (lang: 'en' | 'pt') => {
   if (Object.keys(genreCache[lang]).length > 0) return;
 
   const apiLang = lang === 'en' ? 'en-US' : 'pt-BR';
+  const region = lang === 'pt' ? '&region=BR' : '';
 
   try {
     const [movieRes, tvRes] = await Promise.all([
-      fetch(`${BASE_URL}/genre/movie/list?api_key=${API_KEY}&language=${apiLang}`),
-      fetch(`${BASE_URL}/genre/tv/list?api_key=${API_KEY}&language=${apiLang}`)
+      fetch(`${BASE_URL}/genre/movie/list?api_key=${API_KEY}&language=${apiLang}${region}`),
+      fetch(`${BASE_URL}/genre/tv/list?api_key=${API_KEY}&language=${apiLang}${region}`)
     ]);
 
     const movieData = await movieRes.json();
@@ -57,10 +58,20 @@ const transformContent = (result: any, lang: 'en' | 'pt', fallbackType?: 'movie'
   if (!mediaType && fallbackType) mediaType = fallbackType;
   if (!mediaType) mediaType = result.title ? 'movie' : 'tv';
 
+  // Priorizar título traduzido, mas usar original se não houver tradução
+  const title = lang === 'pt' 
+    ? (result.title || result.name || result.original_name || result.original_title)
+    : (result.title || result.name || result.original_name || result.original_title);
+
+  // Priorizar descrição traduzida
+  const description = result.overview 
+    ? result.overview 
+    : (lang === 'pt' ? "Sem descrição disponível." : "No description available.");
+
   return {
     id: result.id,
-    title: result.title || result.name || result.original_name,
-    description: result.overview || (lang === 'pt' ? "Sem descrição disponível." : "No description available."),
+    title: title,
+    description: description,
     backdropUrl: result.backdrop_path
       ? `${IMAGE_BASE_URL}${result.backdrop_path}`
       : 'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?auto=format&fit=crop&w=1920&q=80',
@@ -146,6 +157,7 @@ export const getTrailerKey = async (movie: Movie, lang: 'en' | 'pt'): Promise<st
 export const getFeaturedContent = async (type: 'movie' | 'tv', lang: 'en' | 'pt'): Promise<Movie> => {
   await fetchGenres(lang);
   const apiLang = lang === 'en' ? 'en-US' : 'pt-BR';
+  const region = lang === 'pt' ? '&region=BR' : '';
 
   // Get current date and date from 6 months ago for recent releases
   const currentDate = new Date();
@@ -157,15 +169,15 @@ export const getFeaturedContent = async (type: 'movie' | 'tv', lang: 'en' | 'pt'
 
   // Fetch trending content from the last 6 months with high ratings
   const endpoint = type === 'movie'
-    ? `/discover/movie?api_key=${API_KEY}&language=${apiLang}&sort_by=popularity.desc&primary_release_date.gte=${releaseDateGte}&primary_release_date.lte=${releaseDateLte}&vote_count.gte=100`
-    : `/discover/tv?api_key=${API_KEY}&language=${apiLang}&sort_by=popularity.desc&first_air_date.gte=${releaseDateGte}&first_air_date.lte=${releaseDateLte}&vote_count.gte=50`;
+    ? `/discover/movie?api_key=${API_KEY}&language=${apiLang}&region=BR&sort_by=popularity.desc&primary_release_date.gte=${releaseDateGte}&primary_release_date.lte=${releaseDateLte}&vote_count.gte=100`
+    : `/discover/tv?api_key=${API_KEY}&language=${apiLang}&region=BR&sort_by=popularity.desc&first_air_date.gte=${releaseDateGte}&first_air_date.lte=${releaseDateLte}&vote_count.gte=50`;
 
   const response = await fetch(`${BASE_URL}${endpoint}`);
   const data = await response.json();
 
   if (!data.results || data.results.length === 0) {
     // Fallback to trending if no recent releases
-    const fallbackResponse = await fetch(`${BASE_URL}/trending/${type}/week?api_key=${API_KEY}&language=${apiLang}`);
+    const fallbackResponse = await fetch(`${BASE_URL}/trending/${type}/week?api_key=${API_KEY}&language=${apiLang}&region=BR`);
     const fallbackData = await fallbackResponse.json();
     const randomIndex = Math.floor(Math.random() * Math.min(5, fallbackData.results.length));
     return transformContent(fallbackData.results[randomIndex], lang, type);
@@ -181,6 +193,7 @@ export const getFeaturedContent = async (type: 'movie' | 'tv', lang: 'en' | 'pt'
 export const getContentRows = async (type: 'movie' | 'tv', lang: 'en' | 'pt'): Promise<CategoryRow[]> => {
   await fetchGenres(lang);
   const apiLang = lang === 'en' ? 'en-US' : 'pt-BR';
+  const region = lang === 'pt' ? '&region=BR' : '';
 
   // Get current year and last year for filtering
   const currentYear = new Date().getFullYear();
@@ -192,58 +205,58 @@ export const getContentRows = async (type: 'movie' | 'tv', lang: 'en' | 'pt'): P
     endpoints = [
       {
         title: lang === 'pt' ? "Lançamentos 2024-2025" : "New Releases 2024-2025",
-        url: `/discover/movie?api_key=${API_KEY}&language=${apiLang}&sort_by=popularity.desc&primary_release_year=${currentYear}&vote_count.gte=50`
+        url: `/discover/movie?api_key=${API_KEY}&language=${apiLang}&region=BR&sort_by=popularity.desc&primary_release_year=${currentYear}&vote_count.gte=50`
       },
       {
         title: lang === 'pt' ? "Em Alta Hoje" : "Trending Now",
-        url: `/trending/movie/week?api_key=${API_KEY}&language=${apiLang}`
+        url: `/trending/movie/week?api_key=${API_KEY}&language=${apiLang}&region=BR`
       },
       {
         title: lang === 'pt' ? "Nos Cinemas" : "Now Playing",
-        url: `/movie/now_playing?api_key=${API_KEY}&language=${apiLang}`
+        url: `/movie/now_playing?api_key=${API_KEY}&language=${apiLang}&region=BR`
       },
       {
         title: lang === 'pt' ? "Populares de 2024" : "Popular in 2024",
-        url: `/discover/movie?api_key=${API_KEY}&language=${apiLang}&sort_by=vote_average.desc&primary_release_year=${currentYear}&vote_count.gte=100`
+        url: `/discover/movie?api_key=${API_KEY}&language=${apiLang}&region=BR&sort_by=vote_average.desc&primary_release_year=${currentYear}&vote_count.gte=100`
       },
       {
         title: lang === 'pt' ? "Ação e Aventura" : "Action & Adventure",
-        url: `/discover/movie?api_key=${API_KEY}&with_genres=28&language=${apiLang}&sort_by=popularity.desc&primary_release_year=${currentYear}`
+        url: `/discover/movie?api_key=${API_KEY}&with_genres=28&language=${apiLang}&region=BR&sort_by=popularity.desc&primary_release_year=${currentYear}`
       },
       {
         title: lang === 'pt' ? "Ficção Científica" : "Sci-Fi",
-        url: `/discover/movie?api_key=${API_KEY}&with_genres=878&language=${apiLang}&sort_by=popularity.desc&vote_count.gte=50`
+        url: `/discover/movie?api_key=${API_KEY}&with_genres=878&language=${apiLang}&region=BR&sort_by=popularity.desc&vote_count.gte=50`
       },
       {
         title: lang === 'pt' ? "Comédia" : "Comedy",
-        url: `/discover/movie?api_key=${API_KEY}&with_genres=35&language=${apiLang}&sort_by=popularity.desc&primary_release_year=${currentYear}`
+        url: `/discover/movie?api_key=${API_KEY}&with_genres=35&language=${apiLang}&region=BR&sort_by=popularity.desc&primary_release_year=${currentYear}`
       },
     ];
   } else {
     endpoints = [
       {
         title: lang === 'pt' ? "Séries Novas 2024-2025" : "New Series 2024-2025",
-        url: `/discover/tv?api_key=${API_KEY}&language=${apiLang}&sort_by=popularity.desc&first_air_date_year=${currentYear}&vote_count.gte=30`
+        url: `/discover/tv?api_key=${API_KEY}&language=${apiLang}&region=BR&sort_by=popularity.desc&first_air_date_year=${currentYear}&vote_count.gte=30`
       },
       {
         title: lang === 'pt' ? "Em Alta Esta Semana" : "Trending This Week",
-        url: `/trending/tv/week?api_key=${API_KEY}&language=${apiLang}`
+        url: `/trending/tv/week?api_key=${API_KEY}&language=${apiLang}&region=BR`
       },
       {
         title: lang === 'pt' ? "No Ar Agora" : "On The Air",
-        url: `/tv/on_the_air?api_key=${API_KEY}&language=${apiLang}`
+        url: `/tv/on_the_air?api_key=${API_KEY}&language=${apiLang}&region=BR`
       },
       {
         title: lang === 'pt' ? "Populares de 2024" : "Popular in 2024",
-        url: `/discover/tv?api_key=${API_KEY}&language=${apiLang}&sort_by=vote_average.desc&first_air_date_year=${currentYear}&vote_count.gte=50`
+        url: `/discover/tv?api_key=${API_KEY}&language=${apiLang}&region=BR&sort_by=vote_average.desc&first_air_date_year=${currentYear}&vote_count.gte=50`
       },
       {
         title: lang === 'pt' ? "Ação e Aventura" : "Action & Adventure",
-        url: `/discover/tv?api_key=${API_KEY}&with_genres=10759&language=${apiLang}&sort_by=popularity.desc`
+        url: `/discover/tv?api_key=${API_KEY}&with_genres=10759&language=${apiLang}&region=BR&sort_by=popularity.desc`
       },
       {
         title: lang === 'pt' ? "Drama" : "Drama",
-        url: `/discover/tv?api_key=${API_KEY}&with_genres=18&language=${apiLang}&sort_by=popularity.desc&vote_count.gte=50`
+        url: `/discover/tv?api_key=${API_KEY}&with_genres=18&language=${apiLang}&region=BR&sort_by=popularity.desc&vote_count.gte=50`
       },
     ];
   }
@@ -267,14 +280,15 @@ export const getContentRows = async (type: 'movie' | 'tv', lang: 'en' | 'pt'): P
 export const getAnimeRows = async (lang: 'en' | 'pt'): Promise<CategoryRow[]> => {
   await fetchGenres(lang);
   const apiLang = lang === 'en' ? 'en-US' : 'pt-BR';
+  const region = lang === 'pt' ? '&region=BR' : '';
 
   // ID 16 = Animation. Combinamos com original_language=ja para focar em Anime Japonês.
   const endpoints = [
-    { title: lang === 'pt' ? "Animes em Alta" : "Trending Anime", url: `/discover/tv?api_key=${API_KEY}&language=${apiLang}&with_genres=16&with_original_language=ja&sort_by=popularity.desc`, type: 'tv' },
-    { title: lang === 'pt' ? "Filmes de Anime" : "Anime Movies", url: `/discover/movie?api_key=${API_KEY}&language=${apiLang}&with_genres=16&with_original_language=ja&sort_by=popularity.desc`, type: 'movie' },
-    { title: lang === 'pt' ? "Animes de Ação" : "Action Anime", url: `/discover/tv?api_key=${API_KEY}&language=${apiLang}&with_genres=16,10759&with_original_language=ja&sort_by=vote_count.desc`, type: 'tv' },
-    { title: lang === 'pt' ? "Animes de Fantasia" : "Fantasy Anime", url: `/discover/tv?api_key=${API_KEY}&language=${apiLang}&with_genres=16,10765&with_original_language=ja&sort_by=vote_count.desc`, type: 'tv' },
-    { title: lang === 'pt' ? "Clássicos" : "Classics", url: `/discover/tv?api_key=${API_KEY}&language=${apiLang}&with_genres=16&with_original_language=ja&sort_by=vote_average.desc&vote_count.gte=100`, type: 'tv' },
+    { title: lang === 'pt' ? "Animes em Alta" : "Trending Anime", url: `/discover/tv?api_key=${API_KEY}&language=${apiLang}&region=BR&with_genres=16&with_original_language=ja&sort_by=popularity.desc`, type: 'tv' },
+    { title: lang === 'pt' ? "Filmes de Anime" : "Anime Movies", url: `/discover/movie?api_key=${API_KEY}&language=${apiLang}&region=BR&with_genres=16&with_original_language=ja&sort_by=popularity.desc`, type: 'movie' },
+    { title: lang === 'pt' ? "Animes de Ação" : "Action Anime", url: `/discover/tv?api_key=${API_KEY}&language=${apiLang}&region=BR&with_genres=16,10759&with_original_language=ja&sort_by=vote_count.desc`, type: 'tv' },
+    { title: lang === 'pt' ? "Animes de Fantasia" : "Fantasy Anime", url: `/discover/tv?api_key=${API_KEY}&language=${apiLang}&region=BR&with_genres=16,10765&with_original_language=ja&sort_by=vote_count.desc`, type: 'tv' },
+    { title: lang === 'pt' ? "Clássicos" : "Classics", url: `/discover/tv?api_key=${API_KEY}&language=${apiLang}&region=BR&with_genres=16&with_original_language=ja&sort_by=vote_average.desc&vote_count.gte=100`, type: 'tv' },
   ];
 
   const categoryPromises = endpoints.map(async (category) => {
@@ -296,9 +310,10 @@ export const searchContent = async (query: string, lang: 'en' | 'pt'): Promise<M
   if (!query) return [];
   await fetchGenres(lang);
   const apiLang = lang === 'en' ? 'en-US' : 'pt-BR';
+  const region = lang === 'pt' ? '&region=BR' : '';
 
   try {
-    const response = await fetch(`${BASE_URL}/search/multi?api_key=${API_KEY}&language=${apiLang}&query=${encodeURIComponent(query)}&page=1&include_adult=false`);
+    const response = await fetch(`${BASE_URL}/search/multi?api_key=${API_KEY}&language=${apiLang}&region=BR&query=${encodeURIComponent(query)}&page=1&include_adult=false`);
     const data = await response.json();
 
     if (!data.results) return [];
