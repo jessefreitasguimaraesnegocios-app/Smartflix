@@ -75,6 +75,7 @@ export const Hero: React.FC<HeroProps> = ({ movie, onMoreInfo, onPlay, language,
         {showVideo && trailerKey ? (
           <div className="relative w-full h-full">
             <iframe
+              key={`${trailerKey}-${isMuted ? 'muted' : 'unmuted'}`}
               src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&loop=1&playlist=${trailerKey}&enablejsapi=1&origin=${origin}&vq=hd2160&hd=1&quality=highres&playsinline=1`}
               title={movie.title}
               className="absolute top-1/2 left-1/2 w-[177.77vh] h-[56.25vw] min-h-full min-w-full -translate-x-1/2 -translate-y-1/2 pointer-events-none"
