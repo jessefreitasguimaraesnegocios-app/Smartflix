@@ -100,7 +100,7 @@ export const Hero: React.FC<HeroProps> = ({ movie, onMoreInfo, onPlay, language,
 
       {/* Content - Positioned at bottom */}
       <div
-        className={`absolute bottom-[25%] md:bottom-[20%] left-4 md:left-12 max-w-2xl space-y-4 z-10 transition-opacity duration-500 ${showControls ? 'opacity-100' : 'opacity-0'
+        className={`absolute bottom-[30%] md:bottom-[25%] left-4 md:left-12 max-w-2xl space-y-4 z-10 transition-opacity duration-500 ${showControls ? 'opacity-100' : 'opacity-0'
           }`}
       >
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold drop-shadow-2xl text-white">

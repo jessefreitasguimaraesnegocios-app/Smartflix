@@ -216,7 +216,7 @@ const App: React.FC = () => {
                 language={language}
                 shouldPause={!!selectedMovie}
               />
-              <div className="relative z-10 -mt-32 md:-mt-40 space-y-4 md:space-y-8">
+              <div className="relative z-10 -mt-48 md:-mt-56 space-y-4 md:space-y-8">
                 {categories.map((category, index) => (
                   <MovieRow
                     key={`${contentType}-${language}-${index}`}
